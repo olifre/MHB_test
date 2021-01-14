@@ -2,11 +2,9 @@ name: github pages
 
 on:
   push
-#    branches:
-#      - master
 
 jobs:
-  deploy:
+  gen-hugo:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
@@ -24,16 +22,57 @@ jobs:
         run: |
           hugo --minify
 
-      - name: Generate PDFs with pandoc
-        uses: docker://pandoc/latex:latest
+      - name: Upload page
+        uses: actions/upload-artifact@v2
         with:
-          entrypoint: /bin/sh
-          args: -x .github/workflows/gen-pandoc.sh
+          name: page
+          path: public
+          retention-days: 2
+
+  gen-pdfs:
+    runs-on: ubuntu-20.04
+    container: docker://pandoc/latex:latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install bash
+        run: apk install bash
+
+      - name: Generate PDFs with pandoc
+        shell: bash
+        run: |
+          mkdir pdf
+          for index in find -name "_index.md"; do
+            MOD_DIR=$(dirname "${index}")
+            MOD_NAME=$(basename "${MOD_DIR}")
+            pushd "${MOD_DIR}"
+            pandoc _index.md -o "${GITHUB_WORKSPACE}/${MOD_NAME}.pdf"
+            popd -
+          done
+
+      - name: Upload PDFs
+        uses: actions/upload-artifact@v2
+        with:
+          name: pdfs
+          path: PDF
+          retention-days: 2
+
+  deploy-page:
+    needs: [ gen-hugo, gen-pdfs ]
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v2
+
+      - name: Prepare page tree
+        run: |
+          mv pdf page/
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
+        if: endsWith(github.event.ref, "/master")
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: ./public
+          publish_dir: ./page
           force_orphan: true
