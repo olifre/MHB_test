@@ -41,6 +41,7 @@ jobs:
       - name: Generate PDFs with pandoc
         shell: bash
         run: |
+          set -x
           mkdir pdf
           for index in find -name "_index.md"; do
             MOD_DIR=$(dirname "${index}")
