@@ -43,11 +43,11 @@ jobs:
         run: |
           mkdir pdf
           set -x
-          for index in $(find -name "_index.md"); do
+          find . -type f -name "_index.md" -print0 | while IFS= read -r -d '' index;
             MOD_DIR=$(dirname "${index}")
             MOD_NAME=$(basename "${MOD_DIR}")
             pushd "${MOD_DIR}" >/dev/null
-            pandoc _index.md -o "${GITHUB_WORKSPACE}/${MOD_NAME}.pdf"
+            pandoc "_index.md" -o "${GITHUB_WORKSPACE}/${MOD_NAME}.pdf"
             popd >/dev/null
           done
 
