@@ -31,10 +31,14 @@ jobs:
           retention-days: 2
 
   gen-pdfs:
+    needs: [ gen-hugo ]
     runs-on: ubuntu-20.04
     container: docker://pandoc/latex:latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Download page artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: page
 
       - name: Install bash
         run: apk add bash
@@ -42,13 +46,14 @@ jobs:
       - name: Generate PDFs with pandoc
         shell: bash
         run: |
+          tar xf page.tar.gz
           mkdir -p pdf
-          find . -type f -name "_index.md" -print0 | while IFS= read -r -d '' index; do
+          find public/docs/ -type f -name "index.html" -print0 | while IFS= read -r -d '' index; do
             MOD_DIR=$(dirname "${index}")
             MOD_NAME=$(basename "${MOD_DIR}")
             echo "Processing ${MOD_NAME}..."
             pushd "${MOD_DIR}" >/dev/null
-            pandoc "_index.md" -o "${GITHUB_WORKSPACE}/pdf/${MOD_NAME}.pdf"
+            pandoc "index.html" -o "${GITHUB_WORKSPACE}/pdf/${MOD_NAME}.pdf"
             popd >/dev/null
           done
           tar czf pdf.tar.gz pdf
