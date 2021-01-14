@@ -20,7 +20,7 @@ jobs:
 
       - name: Build
         run: |
-          hugo --minify
+          hugo --minify --theme book
           tar czf page.tar.gz public
 
       - name: Upload page
@@ -30,8 +30,38 @@ jobs:
           path: page.tar.gz
           retention-days: 2
 
+  gen-pdfs:
+    runs-on: ubuntu-20.04
+    container: docker://pandoc/latex:latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install bash
+        run: apk add bash
+
+      - name: Generate PDFs with pandoc
+        shell: bash
+        run: |
+          mkdir -p pdf
+          find . -type f -name "_index.md" -print0 | while IFS= read -r -d '' index; do
+            MOD_DIR=$(dirname "${index}")
+            MOD_NAME=$(basename "${MOD_DIR}")
+            echo "Processing ${MOD_NAME}..."
+            pushd "${MOD_DIR}" >/dev/null
+            pandoc "_index.md" -o "${GITHUB_WORKSPACE}/pdf/${MOD_NAME}.pdf"
+            popd >/dev/null
+          done
+          tar czf pdf.tar.gz pdf
+
+      - name: Upload PDFs
+        uses: actions/upload-artifact@v2
+        with:
+          name: pdf
+          path: pdf.tar.gz
+          retention-days: 2
+
   deploy-page:
-    needs: [ gen-hugo ]
+    needs: [ gen-hugo, gen-pdfs ]
     runs-on: ubuntu-20.04
     steps:
       - name: Download all artifacts
@@ -40,6 +70,8 @@ jobs:
       - name: Prepare page tree
         run: |
           tar xf page/page.tar.gz
+          tar xf pdf/pdf.tar.gz
+          mv pdf public/
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
