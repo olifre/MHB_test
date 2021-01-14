@@ -28,7 +28,7 @@ jobs:
         uses: docker://pandoc/latex:latest
         with:
           entrypoint: /bin/sh
-          args: .github/workflows/gen-pandoc.sh
+          args: -x .github/workflows/gen-pandoc.sh
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
