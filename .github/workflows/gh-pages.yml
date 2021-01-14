@@ -43,7 +43,7 @@ jobs:
         run: |
           mkdir pdf
           set -x
-          find . -type f -name "_index.md" -print0 | while IFS= read -r -d '' index;
+          find . -type f -name "_index.md" -print0 | while IFS= read -r -d '' index; do
             MOD_DIR=$(dirname "${index}")
             MOD_NAME=$(basename "${MOD_DIR}")
             pushd "${MOD_DIR}" >/dev/null
