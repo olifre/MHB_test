@@ -41,14 +41,13 @@ jobs:
       - name: Generate PDFs with pandoc
         shell: bash
         run: |
-          set -x
           mkdir pdf
           for index in $(find -name "_index.md"); do
             MOD_DIR=$(dirname "${index}")
             MOD_NAME=$(basename "${MOD_DIR}")
-            pushd "${MOD_DIR}"
+            pushd "${MOD_DIR}" >/dev/null
             pandoc _index.md -o "${GITHUB_WORKSPACE}/${MOD_NAME}.pdf"
-            popd -
+            popd >/dev/null
           done
 
       - name: Upload PDFs
