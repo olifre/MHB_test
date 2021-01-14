@@ -21,6 +21,7 @@ jobs:
       - name: Build
         run: |
           hugo --minify
+          tar czf page.tar.gz public
 
       - name: Upload page
         uses: actions/upload-artifact@v2
@@ -41,21 +42,21 @@ jobs:
       - name: Generate PDFs with pandoc
         shell: bash
         run: |
-          mkdir pdf
-          set -x
+          mkdir -p pdfs
           find . -type f -name "_index.md" -print0 | while IFS= read -r -d '' index; do
             MOD_DIR=$(dirname "${index}")
             MOD_NAME=$(basename "${MOD_DIR}")
             pushd "${MOD_DIR}" >/dev/null
-            pandoc "_index.md" -o "${GITHUB_WORKSPACE}/${MOD_NAME}.pdf"
+            pandoc "_index.md" -o "${GITHUB_WORKSPACE}/pdfs/${MOD_NAME}.pdf"
             popd >/dev/null
           done
+          tar czf pdfs.tar.gz pdfs
 
       - name: Upload PDFs
         uses: actions/upload-artifact@v2
         with:
           name: pdfs
-          path: PDF
+          path: pdfs.tar.gz
           retention-days: 2
 
   deploy-page:
@@ -67,6 +68,8 @@ jobs:
 
       - name: Prepare page tree
         run: |
+          tar xf page.tar.gz
+          tar xf pdfs.tar.gz
           mv pdf page/
 
       - name: Deploy
