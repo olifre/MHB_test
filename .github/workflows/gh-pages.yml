@@ -27,7 +27,7 @@ jobs:
       - name: Generate PDFs with pandoc
         uses: docker://pandoc/latex:latest
         with:
-          entrypoint: /bin/bash
+          entrypoint: /bin/sh
           args: .github/workflows/gen-pandoc.sh
 
       - name: Deploy

@@ -1,5 +1,3 @@
-#!/bin/bash
-
 for index in find -name "_index.md"; do
   MOD_DIR=$(dirname "${index}")
   MOD_NAME=$(basename "${MOD_DIR}")
