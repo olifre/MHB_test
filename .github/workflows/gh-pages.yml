@@ -46,6 +46,7 @@ jobs:
           find . -type f -name "_index.md" -print0 | while IFS= read -r -d '' index; do
             MOD_DIR=$(dirname "${index}")
             MOD_NAME=$(basename "${MOD_DIR}")
+            echo "Processing ${MOD_NAME}..."
             pushd "${MOD_DIR}" >/dev/null
             pandoc "_index.md" -o "${GITHUB_WORKSPACE}/pdfs/${MOD_NAME}.pdf"
             popd >/dev/null
@@ -68,8 +69,8 @@ jobs:
 
       - name: Prepare page tree
         run: |
-          tar xf page.tar.gz
-          tar xf pdfs.tar.gz
+          tar xf page/page.tar.gz
+          tar xf pdfs/pdfs.tar.gz
           mv pdf page/
 
       - name: Deploy
