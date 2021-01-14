@@ -43,7 +43,7 @@ jobs:
         run: |
           set -x
           mkdir pdf
-          for index in find -name "_index.md"; do
+          for index in $(find -name "_index.md"); do
             MOD_DIR=$(dirname "${index}")
             MOD_NAME=$(basename "${MOD_DIR}")
             pushd "${MOD_DIR}"
