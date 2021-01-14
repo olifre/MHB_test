@@ -27,7 +27,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: page
-          path: public
+          path: page.tar.gz
           retention-days: 2
 
   gen-pdfs:
