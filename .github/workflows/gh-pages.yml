@@ -36,7 +36,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Install bash
-        run: apk install bash
+        run: apk get bash
 
       - name: Generate PDFs with pandoc
         shell: bash
